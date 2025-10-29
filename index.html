@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>취침 플레이리스트 💤</title>
     <style>
         * {
@@ -10,328 +10,526 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e0f7f7 0%, #b8e6e0 100%);
-            color: #0a3f3f;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", Arial, sans-serif;
+            background: linear-gradient(135deg, #E8F8F7 0%, #B8F5E9 50%, #A8E6CE 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 배경 패턴 효과 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 15% 25%, rgba(0, 206, 201, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(168, 230, 206, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(184, 245, 233, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float-pattern 20s ease-in-out infinite;
+        }
+        
+        @keyframes float-pattern {
+            0%, 100% { opacity: 0.6; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-20px); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 254, 253, 0.95) 100%);
+            border-radius: 30px 30px 0 0;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 10px 40px rgba(0, 206, 201, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 헤더 장식 요소 */
+        .header::before {
+            content: '💤';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.08;
+            top: -15px;
+            left: 30px;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        .header::after {
+            content: '🎵';
+            position: absolute;
+            font-size: 90px;
+            opacity: 0.08;
+            bottom: -10px;
+            right: 30px;
+            animation: bounce-soft 4s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.08; transform: scale(1); }
+            50% { opacity: 0.15; transform: scale(1.1); }
+        }
+        
+        @keyframes bounce-soft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 50%, #00CEC9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -1px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            color: #3ab8af;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .video-container {
+            background: white;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #000;
         }
 
-        .container {
+        /* 쇼츠 전용 비디오 래퍼 - PC 최적화 */
+        .video-wrapper.shorts-mode {
+            padding-bottom: 0;
+            height: auto;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .video-wrapper.shorts-mode::before {
+            content: '';
+            display: block;
+            padding-bottom: 177.78%;
+        }
+        
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-info {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 254, 253, 0.98) 100%);
+            padding: 30px;
+            color: #2d3436;
+            backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(0, 206, 201, 0.1);
+        }
+        
+        .now-playing {
+            font-size: 13px;
+            color: #00CEC9;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .shorts-indicator {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+        }
+        
+        .video-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #2d3436;
+            line-height: 1.3;
+        }
+        
+        .timer-box {
+            background: linear-gradient(135deg, rgba(0, 206, 201, 0.08) 0%, rgba(168, 230, 206, 0.08) 100%);
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 206, 201, 0.2);
+            text-align: center;
+            font-size: 15px;
+            color: #2d3436;
+            font-weight: 600;
+        }
+        
+        .timer-number {
+            color: #00CEC9;
+            font-weight: 800;
+            font-size: 18px;
+            margin-left: 5px;
+        }
+        
+        .stats-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 254, 253, 0.95) 100%);
+            padding: 40px 30px;
+            border-radius: 0 0 30px 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 -5px 20px rgba(0, 206, 201, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .section-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #2d3436;
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        
+        .playlist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             max-width: 900px;
             margin: 0 auto;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(78, 205, 196, 0.2);
-            border-radius: 20px;
-            border: 2px solid rgba(78, 205, 196, 0.4);
-        }
-
-        .header h1 {
-            font-size: clamp(24px, 5vw, 36px);
-            color: #2a9d8f;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
-        }
-
-        .header p {
-            color: #3ab8af;
-            font-size: clamp(14px, 3vw, 16px);
-        }
-
-        .player-wrapper {
-            position: relative;
-            width: 100%;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 30px;
-            transition: all 0.5s ease;
-        }
-
-        .player-wrapper.normal {
-            padding-bottom: 56.25%;
-            box-shadow: 0 10px 40px rgba(78, 205, 196, 0.3);
-            border: 3px solid #4ECDC4;
-        }
-
-        .player-wrapper.shorts {
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-            padding-bottom: 177.78%;
-            box-shadow: 0 10px 40px rgba(255, 107, 107, 0.4);
-            border: 3px solid #ff6b6b;
-        }
-
-        @media (max-width: 768px) {
-            .player-wrapper.shorts {
-                max-width: 100%;
-                padding-bottom: 177.78%;
-            }
-        }
-
-        #player {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .controls {
-            background: rgba(78, 205, 196, 0.25);
-            padding: 25px;
-            border-radius: 20px;
-            border: 2px solid rgba(78, 205, 196, 0.4);
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .controls.shorts-playing {
-            background: rgba(255, 107, 107, 0.2);
-            border-color: rgba(255, 107, 107, 0.4);
-        }
-
-        .info-box {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .current-video {
-            font-size: clamp(16px, 3.5vw, 20px);
-            color: #2a9d8f;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .current-video.shorts-playing {
-            color: #c92a2a;
-        }
-
-        .now-playing-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: clamp(11px, 2vw, 12px);
-            font-weight: bold;
-            margin-right: 8px;
-            background: rgba(78, 205, 196, 0.4);
-            color: #0a3f3f;
-        }
-
-        .now-playing-badge.shorts {
-            background: rgba(255, 107, 107, 0.4);
-            color: #c92a2a;
-        }
-
-        .timer {
-            font-size: clamp(14px, 3vw, 18px);
-            color: #0a3f3f;
-            background: rgba(78, 205, 196, 0.4);
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-
-        .timer.shorts-playing {
-            background: rgba(255, 107, 107, 0.3);
-            color: #c92a2a;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(78, 205, 196, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 0;
-        }
-
-        .progress-bar.shorts-playing {
-            background: rgba(255, 107, 107, 0.2);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4ECDC4, #2a9d8f);
-            width: 0%;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(78, 205, 196, 0.6);
-        }
-
-        .progress-fill.shorts-playing {
-            background: linear-gradient(90deg, #ff6b6b, #c92a2a);
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
-        }
-
-        .playlist {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 20px;
-            border: 2px solid rgba(78, 205, 196, 0.4);
-        }
-
-        .playlist h2 {
-            color: #2a9d8f;
-            margin-bottom: 15px;
-            font-size: clamp(18px, 4vw, 24px);
-        }
-
-        .playlist-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        @media (max-width: 480px) {
-            .playlist-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-        }
-
-        .playlist-item {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
+        
+        .song-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 22px;
+            box-shadow: 
+                0 2px 12px rgba(0, 206, 201, 0.08),
+                0 1px 4px rgba(0, 0, 0, 0.04);
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .playlist-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-
-        .playlist-item.shorts {
-            border: 3px solid rgba(255, 107, 107, 0.3);
-        }
-
-        .playlist-item.shorts:hover {
-            border-color: #ff6b6b;
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
-        }
-
-        .playlist-item.normal {
-            border: 3px solid rgba(78, 205, 196, 0.3);
-        }
-
-        .playlist-item.normal:hover {
-            border-color: #4ECDC4;
-            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
-        }
-
-        .playlist-item.active {
-            box-shadow: 0 0 25px rgba(78, 205, 196, 0.6);
-        }
-
-        .playlist-item.active.shorts {
-            box-shadow: 0 0 25px rgba(255, 107, 107, 0.6);
-        }
-
-        .thumbnail-wrapper {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
             position: relative;
-            width: 100%;
-            overflow: hidden;
-            background: #000;
         }
 
-        .thumbnail-wrapper.shorts {
-            padding-bottom: 177.78%;
+        .song-number {
+            font-size: 16px;
+            font-weight: 800;
+            color: #b2bec3;
+            min-width: 35px;
+            text-align: center;
         }
 
-        .thumbnail-wrapper.normal {
-            padding-bottom: 56.25%;
+        .song-card.shorts-card .song-number {
+            color: #FFB3D1;
         }
 
-        .thumbnail {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .song-card.playing .song-number {
+            color: #00CEC9;
         }
 
-        .playlist-item-info {
-            padding: 12px;
+        .song-card.shorts-playing .song-number {
+            color: #FF6B9D;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: clamp(10px, 2vw, 12px);
-            font-weight: bold;
-            margin-bottom: 8px;
+        .play-icon-small {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 15px;
+            padding-left: 3px;
+            box-shadow: 0 4px 12px rgba(0, 206, 201, 0.25);
+            transition: all 0.3s ease;
         }
 
-        .badge.short {
-            background: rgba(255, 107, 107, 0.4);
-            color: #c92a2a;
+        .song-card.shorts-card .play-icon-small {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.25);
         }
 
-        .badge.video {
-            background: rgba(78, 205, 196, 0.4);
-            color: #0a3f3f;
+        .song-title-grid {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3436;
+            line-height: 1.5;
+            flex: 1;
         }
 
-        .playlist-item .title {
-            color: #0a3f3f;
-            font-size: clamp(12px, 2.5vw, 14px);
-            margin-bottom: 5px;
-            line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .shorts-badge {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+        }
+        
+        .song-card:hover {
+            transform: translateX(8px);
+            box-shadow: 
+                0 6px 20px rgba(0, 206, 201, 0.15),
+                0 3px 8px rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 206, 201, 0.2);
         }
 
-        .playlist-item .type {
-            color: #2a9d8f;
-            font-size: clamp(10px, 2vw, 12px);
+        .song-card:hover .play-icon-small {
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(0, 206, 201, 0.35);
         }
 
-        @media (max-width: 768px) {
+        .song-card.shorts-card:hover .play-icon-small {
+            box-shadow: 0 6px 16px rgba(255, 107, 157, 0.35);
+        }
+        
+        .song-card.playing {
+            border-color: #00CEC9;
+            background: linear-gradient(135deg, rgba(0, 206, 201, 0.05) 0%, rgba(168, 230, 206, 0.05) 100%);
+            box-shadow: 
+                0 8px 24px rgba(0, 206, 201, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .song-card.shorts-playing {
+            border-color: #FF6B9D;
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.05) 0%, rgba(255, 133, 166, 0.05) 100%);
+            box-shadow: 
+                0 8px 24px rgba(255, 107, 157, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .song-card.shorts-playing .song-number {
+            color: #FF6B9D;
+        }
+
+        .song-card.shorts-playing .play-icon-small {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.35);
+        }
+        
+        .song-card.playing .play-icon-small {
+            animation: pulse-play 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-play {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        /* 스크롤바 스타일링 */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 206, 201, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00CEC9 0%, #A8E6CE 100%);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #00E0D4 0%, #B8F5E9 100%);
+        }
+
+        /* ============================================ */
+        /* 📱 모바일 최적화 (0-767px)                    */
+        /* ============================================ */
+        @media screen and (max-width: 767px) {
+            body {
+                padding: 10px;
+            }
+
             .header {
-                padding: 15px;
+                padding: 25px 20px;
+                border-radius: 20px 20px 0 0;
+            }
+
+            .header::before {
+                font-size: 60px;
+                left: 10px;
+            }
+
+            .header::after {
+                font-size: 50px;
+                right: 10px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header p {
+                font-size: 15px;
+            }
+
+            .video-wrapper.shorts-mode {
+                max-width: 100%;
+            }
+
+            .video-info {
+                padding: 20px 15px;
+            }
+
+            .video-title {
+                font-size: 18px;
+            }
+
+            .now-playing {
+                font-size: 11px;
+            }
+
+            .shorts-indicator {
+                font-size: 10px;
+                padding: 3px 10px;
+            }
+
+            .timer-box {
+                padding: 10px 18px;
+                font-size: 13px;
+            }
+
+            .timer-number {
+                font-size: 16px;
+            }
+
+            .stats-section {
+                padding: 25px 15px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .section-title {
+                font-size: 20px;
                 margin-bottom: 20px;
             }
 
-            .controls {
-                padding: 15px;
+            .playlist-container {
+                gap: 8px;
             }
 
-            .info-box {
-                flex-direction: column;
-                align-items: center;
+            .song-card {
+                padding: 12px 16px;
+                gap: 12px;
+            }
+
+            .song-number {
+                font-size: 14px;
+                min-width: 30px;
+            }
+
+            .play-icon-small {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                font-size: 13px;
+            }
+
+            .song-title-grid {
+                font-size: 13px;
+            }
+
+            .shorts-badge {
+                font-size: 10px;
+                padding: 5px 12px;
+            }
+
+            .song-card:hover {
+                transform: none;
+            }
+
+            .song-card:active {
+                transform: scale(0.98);
             }
         }
 
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #2a9d8f;
-            font-size: clamp(12px, 2.5vw, 14px);
-            opacity: 0.8;
+        /* ============================================ */
+        /* 🖥️ PC 최적화 (1024px 이상)                  */
+        /* ============================================ */
+        @media screen and (min-width: 1024px) {
+            .container {
+                max-width: 1000px;
+            }
+
+            .video-wrapper.shorts-mode {
+                max-width: 550px;
+            }
+
+            .song-card {
+                padding: 18px 24px;
+            }
+        }
+
+        /* ============================================ */
+        /* 🎯 터치 디바이스 최적화                        */
+        /* ============================================ */
+        @media (hover: none) and (pointer: coarse) {
+            .song-card {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+
+            .song-card:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+
+            .song-card:hover {
+                transform: none;
+                box-shadow: 
+                    0 2px 12px rgba(0, 206, 201, 0.08),
+                    0 1px 4px rgba(0, 0, 0, 0.04);
+            }
         }
     </style>
 </head>
@@ -342,35 +540,28 @@
             <p>편안한 밤 되세요 ✨</p>
         </div>
 
-        <div class="player-wrapper normal" id="playerWrapper">
-            <div id="player"></div>
-        </div>
-
-        <div class="controls" id="controls">
-            <div class="info-box">
-                <div class="current-video" id="currentTitle"></div>
+        <div class="video-container">
+            <div class="video-wrapper" id="videoWrapper">
+                <iframe id="videoFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
-            
-            <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-
-            <div class="info-box">
-                <div class="timer" id="timer">다음곡까지 00:00</div>
+            <div class="video-info">
+                <div class="now-playing">
+                    <span>▶ NOW PLAYING</span>
+                    <span class="shorts-indicator" id="shortsIndicator" style="display: none;">SHORTS</span>
+                </div>
+                <div class="video-title" id="videoTitle">로딩 중...</div>
+                <div class="timer-box" id="timerBox">
+                    <span id="timerText">다음곡까지<span class="timer-number" id="countdown">00:00</span></span>
+                </div>
             </div>
         </div>
 
-        <div class="playlist">
-            <h2>🎵 재생목록</h2>
-            <div class="playlist-grid" id="playlistContainer"></div>
-        </div>
-
-        <div class="footer">
-            <p>🌙 좋은 꿈 꾸세요</p>
+        <div class="stats-section">
+            <div class="section-title">🎼 재생목록 (총 9곡)</div>
+            <div class="playlist-container" id="songGrid"></div>
         </div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         const videos = [
             { id: 'uV8KpDCkhds', title: '뭘 하면 좋을 지 댓글로 추천해 주세요', isShort: true },
@@ -384,41 +575,11 @@
             { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', isShort: false }
         ];
 
-        let player;
         let currentIndex = 0;
-        let playDuration = 0;
-        let startTime = 0;
+        let isPlaying = false;
+        let countdown = 0;
         let timerInterval;
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                videoId: videos[0].id,
-                playerVars: {
-                    autoplay: 1,
-                    controls: 1,
-                    modestbranding: 1,
-                    rel: 0,
-                    fs: 1
-                },
-                events: {
-                    onReady: onPlayerReady,
-                    onStateChange: onPlayerStateChange
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            updatePlaylist();
-            playCurrentVideo();
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING) {
-                startTimer();
-            } else if (event.data === YT.PlayerState.PAUSED) {
-                stopTimer();
-            }
-        }
+        let isCurrentShort = false;
 
         function getRandomDuration(isShort) {
             if (isShort) {
@@ -428,110 +589,121 @@
             }
         }
 
-        function playCurrentVideo() {
-            const video = videos[currentIndex];
-            const isShort = video.isShort;
-            playDuration = getRandomDuration(isShort);
-            startTime = Date.now();
-            
-            player.loadVideoById(video.id);
-            
-            // Update player wrapper
-            const wrapper = document.getElementById('playerWrapper');
-            const controls = document.getElementById('controls');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            const timer = document.getElementById('timer');
-            const currentTitle = document.getElementById('currentTitle');
-            
-            if (isShort) {
-                wrapper.className = 'player-wrapper shorts';
-                controls.classList.add('shorts-playing');
-                progressBar.classList.add('shorts-playing');
-                progressFill.classList.add('shorts-playing');
-                timer.classList.add('shorts-playing');
-                currentTitle.classList.add('shorts-playing');
-                currentTitle.innerHTML = `<span class="now-playing-badge shorts">SHORTS</span>${video.title}`;
-            } else {
-                wrapper.className = 'player-wrapper normal';
-                controls.classList.remove('shorts-playing');
-                progressBar.classList.remove('shorts-playing');
-                progressFill.classList.remove('shorts-playing');
-                timer.classList.remove('shorts-playing');
-                currentTitle.classList.remove('shorts-playing');
-                currentTitle.innerHTML = `<span class="now-playing-badge">NOW PLAYING</span>${video.title}`;
-            }
-            
-            updatePlaylist();
-            stopTimer();
-            startTimer();
+        function createSongGrid() {
+            const gridHTML = videos.map((video, index) => {
+                const isCurrentPlaying = index === currentIndex && isPlaying;
+                const playingClass = isCurrentPlaying ? (video.isShort ? 'playing shorts-playing' : 'playing') : '';
+                const shortsCardClass = video.isShort ? 'shorts-card' : '';
+                const shortsBadge = video.isShort ? '<span class="shorts-badge">SHORTS</span>' : '';
+                
+                return `
+                    <div class="song-card ${shortsCardClass} ${playingClass}" onclick="playVideo(${index})" id="card-${index}">
+                        <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
+                        <div class="play-icon-small">▶</div>
+                        <div class="song-title-grid">${video.title}</div>
+                        ${shortsBadge}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('songGrid').innerHTML = gridHTML;
         }
 
-        function startTimer() {
-            stopTimer();
-            timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                const remaining = playDuration - elapsed;
-                
-                if (remaining <= 0) {
-                    nextVideo();
-                    return;
+        function updatePlayingCard() {
+            document.querySelectorAll('.song-card').forEach((card, index) => {
+                card.classList.remove('playing', 'shorts-playing');
+                if (index === currentIndex && isPlaying) {
+                    card.classList.add('playing');
+                    if (videos[index].isShort) {
+                        card.classList.add('shorts-playing');
+                    }
                 }
-                
-                const minutes = Math.floor(remaining / 60);
-                const seconds = remaining % 60;
-                document.getElementById('timer').textContent = 
-                    `다음곡까지 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                const progress = (elapsed / playDuration) * 100;
-                document.getElementById('progressFill').style.width = progress + '%';
-            }, 1000);
-        }
-
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-        }
-
-        function nextVideo() {
-            currentIndex = (currentIndex + 1) % videos.length;
-            playCurrentVideo();
+            });
         }
 
         function playVideo(index) {
             currentIndex = index;
-            playCurrentVideo();
-        }
-
-        function updatePlaylist() {
-            const container = document.getElementById('playlistContainer');
-            container.innerHTML = '';
+            isPlaying = true;
             
-            videos.forEach((video, index) => {
-                const item = document.createElement('div');
-                item.className = `playlist-item ${video.isShort ? 'shorts' : 'normal'}${index === currentIndex ? ' active' : ''}`;
-                item.onclick = () => playVideo(index);
-                
-                const thumbnailUrl = `https://img.youtube.com/vi/${video.id}/mqdefault.jpg`;
-                
-                item.innerHTML = `
-                    <div class="thumbnail-wrapper ${video.isShort ? 'shorts' : 'normal'}">
-                        <img class="thumbnail" src="${thumbnailUrl}" alt="${video.title}">
-                    </div>
-                    <div class="playlist-item-info">
-                        <span class="badge ${video.isShort ? 'short' : 'video'}">${video.isShort ? 'SHORTS' : 'VIDEO'}</span>
-                        <div class="title">${video.title}</div>
-                        <div class="type">${video.isShort ? '30-35초' : '45-80초'}</div>
-                    </div>
-                `;
-                
-                container.appendChild(item);
-            });
+            const video = videos[index];
+            isCurrentShort = video.isShort;
+
+            const videoWrapper = document.getElementById('videoWrapper');
+            const shortsIndicator = document.getElementById('shortsIndicator');
+            const timerBox = document.getElementById('timerBox');
+            const countdown = document.getElementById('countdown');
+
+            if (isCurrentShort) {
+                videoWrapper.classList.add('shorts-mode');
+                shortsIndicator.style.display = 'inline-block';
+                timerBox.style.display = 'none';
+            } else {
+                videoWrapper.classList.remove('shorts-mode');
+                shortsIndicator.style.display = 'none';
+                timerBox.style.display = 'block';
+            }
+            
+            document.getElementById('videoFrame').src = 
+                `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&rel=0`;
+            document.getElementById('videoTitle').textContent = video.title;
+
+            if (isCurrentShort) {
+                if (timerInterval) clearInterval(timerInterval);
+                const duration = getRandomDuration(true);
+                setTimeout(() => {
+                    playNextRandom();
+                }, duration * 1000);
+            } else {
+                const duration = getRandomDuration(false);
+                startTimer(duration);
+            }
+
+            updatePlayingCard();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.addEventListener('beforeunload', () => {
-            stopTimer();
+        function playNextRandom() {
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * videos.length);
+            } while (nextIndex === currentIndex && videos.length > 1);
+            playVideo(nextIndex);
+        }
+
+        function startTimer(duration) {
+            countdown = duration;
+            updateTimer();
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                countdown--;
+                updateTimer();
+
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    playNextRandom();
+                }
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                const minutes = Math.floor(countdown / 60);
+                const seconds = countdown % 60;
+                countdownEl.textContent = ` ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        window.addEventListener('load', function() {
+            createSongGrid();
+            const randomStart = Math.floor(Math.random() * videos.length);
+            playVideo(randomStart);
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) clearInterval(timerInterval);
         });
     </script>
 </body>
